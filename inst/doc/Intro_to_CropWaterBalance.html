@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+<title>Introduction to CropWaterBalance</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to CropWaterBalance</h1>
+
+
+
+<div id="introduction" class="section level1">
+<h1>Introduction</h1>
+<p>Irrigated areas have increased throughout the globe to support the
+growing global population and to cope with climate change impacts (<span class="citation">@Siyal2023</span>). In this context, the
+{CropWaterBalance} allows users to keep track of the soil water deficit
+in the root zone through the crop water balance accounting (<span class="citation">@Andales2012</span>). The goal of the package is to
+assist users in making decisions about when and how much to irrigate.
+The most important function of the package is the <code>CWB()</code>,
+which calculates several parameters of the crop water balance, including
+crop evapotranspiration (ETc), actual crop evapotranspiration, stored
+water in the root zone and soil water deficit (D). The function also
+suggests when irrigate, considering the management allowed depletion
+(MAD) provided by the users. Although the FAO-Penman and Monteith
+equation is recognized as the standard method for estimating daily
+amounts of reference evapotranspiration (ETO) (<span class="citation">@Allen1998</span>), the high number of variables
+required for calculating this model limits its operational use in
+several regions in the world. Thus, the package includes the function
+<code>ETO_PM()</code>, which estimate daily ETO amounts through the
+FAO-Penman and Monteith equation, and the functions
+<code>ETO_PT()</code> and <code>ETO_HS()</code>), which calculates this
+agrometeorological parameter through other two alternative (and simpler)
+methods: Priestley-Taylor (<span class="citation">@Priestley1972</span>)
+and Hargreaves-Samani (<span class="citation">@Hargreaves1985</span>),
+respectively. Additionally, the {CropWaterBalance} has other two
+functions (<code>Compare()</code> and <code>Descriptive()</code>). The
+first calculates measures of accuracy and agreement between two data
+samples and the second calculates descriptive statistics for these
+samples. Therefore, these two functions assist users in selecting
+suitable ET0 estimating methods for a particular region or season.</p>
+</div>
+<div id="getting-started" class="section level1">
+<h1>Getting Started</h1>
+<p>Load the library in your R session.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(CropWaterBalance)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; Attaching package: &#39;CropWaterBalance&#39;</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; The following object is masked from &#39;package:methods&#39;:</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt;     Compare</span></span></code></pre></div>
+<div id="using-eto_pm-to-calculate-daily-amounts-of-reference-evapotranspiration" class="section level2">
+<h2>Using ETO_PM() to calculate daily amounts of reference
+evapotranspiration</h2>
+<p>Reference evapotranspiration (ET0) is the combined process of
+evaporation and transpiration that occurs from well-fertilized and
+disease-free hypothetical grass reference crop, grown in large fields
+under no soil water restriction and achieving full production (<span class="citation">@Allen1998</span>). The <code>ETO_PM()</code> function
+calculates daily ETO amounts using the FAO-Penman and Monteith equation
+(in millimetres).</p>
+</div>
+<div id="step-1-applying-eto_pm-in-campinas-sp-brazil" class="section level2">
+<h2>Step 1: Applying <code>ETO_PM()</code> in Campinas-SP, Brazil</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>Tavg <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">2</span>]</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>Tmax <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">3</span>]</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>Tmin <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">4</span>]</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>Rn <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">6</span>]</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>WS <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">7</span>]</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>RH <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">8</span>]</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>G <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">9</span>]</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>CpsET0PM <span class="ot">&lt;-</span></span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>  <span class="fu">ET0_PM</span>(</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a>    <span class="at">Tavg =</span> Tavg,</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>    <span class="at">Tmax =</span> Tmax,</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>    <span class="at">Tmin =</span> Tmin,</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a>    <span class="at">Rn =</span> Rn,</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a>    <span class="at">RH =</span> RH,</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a>    <span class="at">WS =</span> WS,</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a>    <span class="at">G =</span> G,</span>
+<span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>    <span class="at">Alt =</span> <span class="dv">700</span></span>
+<span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>  )</span>
+<span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a><span class="fu">head</span>(CpsET0PM)</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a><span class="co">#&gt;        ET0_PM</span></span>
+<span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a><span class="co">#&gt; [1,] 2.440372</span></span>
+<span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a><span class="co">#&gt; [2,] 4.171917</span></span>
+<span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a><span class="co">#&gt; [3,] 4.290477</span></span>
+<span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a><span class="co">#&gt; [4,] 3.665459</span></span>
+<span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a><span class="co">#&gt; [5,] 4.848520</span></span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a><span class="co">#&gt; [6,] 5.669878</span></span></code></pre></div>
+<p>By analyzing the <code>ET0_PM()</code> function, the user verify that
+the FAO-Penman and Monteith equation requires several inputs, which
+includes the soil heat flux (G). This latter variable is rarely measure.
+This is the reason why the {CropWaterBalance} has an auxiliary function
+(<code>Soil_Heat_Flux()</code>) that estimates G as function of daily
+average air temperature values. The users may use this auxiliary
+function to estimate G and then apply the <code>ET0_PM()</code>
+function. Alternatively, the users may simply run <code>ET0_PM()</code>
+without the G argument. In this case, this latter function will
+automatically use <code>Soil_Heat_Flux()</code> and then estimate ETO.
+See the example below.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>Tavg <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">2</span>]</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>Tmax <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">3</span>]</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>Tmin <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">4</span>]</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>Rn <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">6</span>]</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>WS <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">7</span>]</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>RH <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">8</span>]</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>G <span class="ot">&lt;-</span> <span class="fu">Soil_Heat_Flux</span>(Tavg)</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a><span class="co">#&gt; Warning in Soil_Heat_Flux(Tavg): The first 3 G values were set to zero</span></span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>CpsET0PM_WithG <span class="ot">&lt;-</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>  <span class="fu">ET0_PM</span>(</span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    <span class="at">Tavg =</span> Tavg,</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>    <span class="at">Tmax =</span> Tmax,</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>    <span class="at">Tmin =</span> Tmin,</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>    <span class="at">Rn =</span> Rn,</span>
+<span id="cb3-15"><a href="#cb3-15" tabindex="-1"></a>    <span class="at">RH =</span> RH,</span>
+<span id="cb3-16"><a href="#cb3-16" tabindex="-1"></a>    <span class="at">WS =</span> WS,</span>
+<span id="cb3-17"><a href="#cb3-17" tabindex="-1"></a>    <span class="at">G =</span> G,</span>
+<span id="cb3-18"><a href="#cb3-18" tabindex="-1"></a>    <span class="at">Alt =</span> <span class="dv">700</span></span>
+<span id="cb3-19"><a href="#cb3-19" tabindex="-1"></a>  )</span>
+<span id="cb3-20"><a href="#cb3-20" tabindex="-1"></a>CpsET0PM_WithoutG <span class="ot">&lt;-</span></span>
+<span id="cb3-21"><a href="#cb3-21" tabindex="-1"></a>  <span class="fu">ET0_PM</span>(</span>
+<span id="cb3-22"><a href="#cb3-22" tabindex="-1"></a>    <span class="at">Tavg =</span> Tavg,</span>
+<span id="cb3-23"><a href="#cb3-23" tabindex="-1"></a>    <span class="at">Tmax =</span> Tmax,</span>
+<span id="cb3-24"><a href="#cb3-24" tabindex="-1"></a>    <span class="at">Tmin =</span> Tmin,</span>
+<span id="cb3-25"><a href="#cb3-25" tabindex="-1"></a>    <span class="at">Rn =</span> Rn,</span>
+<span id="cb3-26"><a href="#cb3-26" tabindex="-1"></a>    <span class="at">RH =</span> RH,</span>
+<span id="cb3-27"><a href="#cb3-27" tabindex="-1"></a>    <span class="at">WS =</span> WS,</span>
+<span id="cb3-28"><a href="#cb3-28" tabindex="-1"></a>    <span class="at">Alt =</span> <span class="dv">700</span></span>
+<span id="cb3-29"><a href="#cb3-29" tabindex="-1"></a>  )</span>
+<span id="cb3-30"><a href="#cb3-30" tabindex="-1"></a><span class="co">#&gt; Warning in Soil_Heat_Flux(Tavg): The first 3 G values were set to zero</span></span>
+<span id="cb3-31"><a href="#cb3-31" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">cbind</span>(CpsET0PM_WithG, CpsET0PM_WithoutG))</span>
+<span id="cb3-32"><a href="#cb3-32" tabindex="-1"></a><span class="co">#&gt;        ET0_PM   ET0_PM</span></span>
+<span id="cb3-33"><a href="#cb3-33" tabindex="-1"></a><span class="co">#&gt; [1,] 2.293183 2.293183</span></span>
+<span id="cb3-34"><a href="#cb3-34" tabindex="-1"></a><span class="co">#&gt; [2,] 4.104242 4.104242</span></span>
+<span id="cb3-35"><a href="#cb3-35" tabindex="-1"></a><span class="co">#&gt; [3,] 4.333359 4.333359</span></span>
+<span id="cb3-36"><a href="#cb3-36" tabindex="-1"></a><span class="co">#&gt; [4,] 3.665304 3.665304</span></span>
+<span id="cb3-37"><a href="#cb3-37" tabindex="-1"></a><span class="co">#&gt; [5,] 4.848440 4.848440</span></span>
+<span id="cb3-38"><a href="#cb3-38" tabindex="-1"></a><span class="co">#&gt; [6,] 5.670052 5.670052</span></span></code></pre></div>
+</div>
+<div id="step-2-applying-eto_pt-and-et0_hs-in-campinas-sp-brazil" class="section level2">
+<h2>Step 2: Applying <code>ETO_PT()</code> and <code>ET0_HS()</code> in
+Campinas-SP, Brazil</h2>
+<p>As described in the introduction, the users may need to estimate ETO
+using non-standard methods, which require less input than the FAO-Penman
+and Monteith. The {CropWaterBalance} allows users to estimate this
+agrometeorological parameter using the Priestley-Taylor
+(<code>ETO_PT()</code>) and Hargreaves-Samani (<code>ET0_HS()</code>)
+methods. Note that the same considerations made for G in respect to
+<code>ETO_PM()</code> are valid for <code>ETO_PT()</code>.</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>Tavg <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">2</span>]</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>Tmax <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">3</span>]</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>Tmin <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">4</span>]</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>Ra <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">5</span>]</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>Rn <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">6</span>]</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>G <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">9</span>]</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>CpsET0PT <span class="ot">&lt;-</span> <span class="fu">ET0_PT</span>(<span class="at">Tavg =</span> Tavg, <span class="at">Rn =</span> Rn, <span class="at">G =</span> G)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>CpsET0HS <span class="ot">&lt;-</span> <span class="fu">ET0_HS</span>(</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a>  <span class="at">Ra =</span> Ra,</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a>  <span class="at">Tavg =</span> Tavg,</span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a>  <span class="at">Tmax =</span> Tmax,</span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a>  <span class="at">Tmin =</span> Tmin</span>
+<span id="cb4-13"><a href="#cb4-13" tabindex="-1"></a>)</span>
+<span id="cb4-14"><a href="#cb4-14" tabindex="-1"></a><span class="fu">head</span>(<span class="fu">cbind</span>(CpsET0PT, CpsET0HS))</span>
+<span id="cb4-15"><a href="#cb4-15" tabindex="-1"></a><span class="co">#&gt;        ET0_PT      ET0</span></span>
+<span id="cb4-16"><a href="#cb4-16" tabindex="-1"></a><span class="co">#&gt; [1,] 3.432709 4.703700</span></span>
+<span id="cb4-17"><a href="#cb4-17" tabindex="-1"></a><span class="co">#&gt; [2,] 5.849554 5.331592</span></span>
+<span id="cb4-18"><a href="#cb4-18" tabindex="-1"></a><span class="co">#&gt; [3,] 6.432616 5.664174</span></span>
+<span id="cb4-19"><a href="#cb4-19" tabindex="-1"></a><span class="co">#&gt; [4,] 5.695334 6.163377</span></span>
+<span id="cb4-20"><a href="#cb4-20" tabindex="-1"></a><span class="co">#&gt; [5,] 7.023900 5.291303</span></span>
+<span id="cb4-21"><a href="#cb4-21" tabindex="-1"></a><span class="co">#&gt; [6,] 7.817355 6.251883</span></span></code></pre></div>
+<p>The estimation of CpsET0PT and/or CpsET0HS raises the following
+question: Can these alternative methods really replace the FAO-Penman
+and Monteith model? Although the answer to this question may be regarded
+as a complex function involving local weather conditions and users’
+subjective choices, the (<code>Compare()</code>) and
+(<code>Descriptive()</code>) functions provide statistical information,
+which may assist users in such decision. In this context, the
+<code>Compare()</code> and <code>Descriptive()</code> functions may be
+used to verify how well an alternative ET0 estimating method approaches
+ET0_PM.</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>Tavg <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">2</span>]</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>Tmax <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">3</span>]</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>Tmin <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">4</span>]</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a>Ra <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">5</span>]</span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a>Rn <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">6</span>]</span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>WS <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">7</span>]</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>RH <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">8</span>]</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>G <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">9</span>]</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a>CpsET0PM <span class="ot">&lt;-</span></span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a>  <span class="fu">ET0_PM</span>(</span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a>    <span class="at">Tavg =</span> Tavg,</span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a>    <span class="at">Tmax =</span> Tmax,</span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a>    <span class="at">Tmin =</span> Tmin,</span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a>    <span class="at">Rn =</span> Rn,</span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>    <span class="at">RH =</span> RH,</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a>    <span class="at">WS =</span> WS,</span>
+<span id="cb5-17"><a href="#cb5-17" tabindex="-1"></a>    <span class="at">G =</span> G,</span>
+<span id="cb5-18"><a href="#cb5-18" tabindex="-1"></a>    <span class="at">Alt =</span> <span class="dv">700</span></span>
+<span id="cb5-19"><a href="#cb5-19" tabindex="-1"></a>  )</span>
+<span id="cb5-20"><a href="#cb5-20" tabindex="-1"></a>CpsET0PT <span class="ot">&lt;-</span> <span class="fu">ET0_PT</span>(<span class="at">Tavg =</span> Tavg, <span class="at">Rn =</span> Rn, <span class="at">G =</span> G)</span>
+<span id="cb5-21"><a href="#cb5-21" tabindex="-1"></a>CpsET0HS <span class="ot">&lt;-</span> <span class="fu">ET0_HS</span>(</span>
+<span id="cb5-22"><a href="#cb5-22" tabindex="-1"></a>  <span class="at">Ra =</span> Ra,</span>
+<span id="cb5-23"><a href="#cb5-23" tabindex="-1"></a>  <span class="at">Tavg =</span> Tavg,</span>
+<span id="cb5-24"><a href="#cb5-24" tabindex="-1"></a>  <span class="at">Tmax =</span> Tmax,</span>
+<span id="cb5-25"><a href="#cb5-25" tabindex="-1"></a>  <span class="at">Tmin =</span> Tmin</span>
+<span id="cb5-26"><a href="#cb5-26" tabindex="-1"></a>)</span>
+<span id="cb5-27"><a href="#cb5-27" tabindex="-1"></a>PM_PT <span class="ot">&lt;-</span> <span class="fu">Compare</span>(<span class="at">Sample1 =</span> CpsET0PM, <span class="at">Sample2 =</span> CpsET0PT)</span>
+<span id="cb5-28"><a href="#cb5-28" tabindex="-1"></a>PM_PT</span>
+<span id="cb5-29"><a href="#cb5-29" tabindex="-1"></a><span class="co">#&gt;       AME     RMSE     dorig     dmod        dref     RQuad</span></span>
+<span id="cb5-30"><a href="#cb5-30" tabindex="-1"></a><span class="co">#&gt; 1 1.69222 1.813449 0.6403158 0.376103 -0.05737454 0.8675223</span></span>
+<span id="cb5-31"><a href="#cb5-31" tabindex="-1"></a>Descrp_PM_PT <span class="ot">&lt;-</span></span>
+<span id="cb5-32"><a href="#cb5-32" tabindex="-1"></a>  <span class="fu">cbind</span>(<span class="fu">Descriptive</span>(<span class="at">Sample =</span> CpsET0PM), <span class="fu">Descriptive</span>(<span class="at">Sample =</span> CpsET0PT))</span>
+<span id="cb5-33"><a href="#cb5-33" tabindex="-1"></a>Descrp_PM_PT</span>
+<span id="cb5-34"><a href="#cb5-34" tabindex="-1"></a><span class="co">#&gt;   SampleSize  Avg  Med   SD   SE MaxValue MinValue FreqZero% SampleSize  Avg</span></span>
+<span id="cb5-35"><a href="#cb5-35" tabindex="-1"></a><span class="co">#&gt; 1        129 3.37 3.46 0.97 0.09     5.76     1.26         0        129 5.06</span></span>
+<span id="cb5-36"><a href="#cb5-36" tabindex="-1"></a><span class="co">#&gt;    Med   SD   SE MaxValue MinValue FreqZero%</span></span>
+<span id="cb5-37"><a href="#cb5-37" tabindex="-1"></a><span class="co">#&gt; 1 5.22 1.46 0.13     8.15     2.14         0</span></span>
+<span id="cb5-38"><a href="#cb5-38" tabindex="-1"></a>PM_HS <span class="ot">&lt;-</span> <span class="fu">Compare</span>(<span class="at">Sample1 =</span> CpsET0PM, <span class="at">Sample2 =</span> CpsET0HS)</span>
+<span id="cb5-39"><a href="#cb5-39" tabindex="-1"></a>PM_HS</span>
+<span id="cb5-40"><a href="#cb5-40" tabindex="-1"></a><span class="co">#&gt;        AME     RMSE     dorig      dmod       dref     RQuad</span></span>
+<span id="cb5-41"><a href="#cb5-41" tabindex="-1"></a><span class="co">#&gt; 1 1.468722 1.630292 0.6033421 0.3818204 0.07924634 0.5546701</span></span>
+<span id="cb5-42"><a href="#cb5-42" tabindex="-1"></a>Descrp_PM_HS <span class="ot">&lt;-</span></span>
+<span id="cb5-43"><a href="#cb5-43" tabindex="-1"></a>  <span class="fu">cbind</span>(<span class="fu">Descriptive</span>(<span class="at">Sample =</span> CpsET0PM), <span class="fu">Descriptive</span>(<span class="at">Sample =</span> CpsET0HS))</span>
+<span id="cb5-44"><a href="#cb5-44" tabindex="-1"></a>Descrp_PM_HS</span>
+<span id="cb5-45"><a href="#cb5-45" tabindex="-1"></a><span class="co">#&gt;   SampleSize  Avg  Med   SD   SE MaxValue MinValue FreqZero% SampleSize  Avg</span></span>
+<span id="cb5-46"><a href="#cb5-46" tabindex="-1"></a><span class="co">#&gt; 1        129 3.37 3.46 0.97 0.09     5.76     1.26         0        129 4.82</span></span>
+<span id="cb5-47"><a href="#cb5-47" tabindex="-1"></a><span class="co">#&gt;    Med   SD  SE MaxValue MinValue FreqZero%</span></span>
+<span id="cb5-48"><a href="#cb5-48" tabindex="-1"></a><span class="co">#&gt; 1 5.11 1.09 0.1     6.73     2.25         0</span></span></code></pre></div>
+<p>The results provided by the <code>Compare()</code> and
+<code>Descriptive()</code> functions, indicate that none of the two
+alternative methods can be used to replace the for calculating daily ET0
+amounts. For instance, the values of the modified index of agreement
+(dmod) (<span class="citation">@Willmott1985</span>) remained below 0.4
+for both comparisons (PM vs PT) and (PM vs HS). Additionally, the
+corresponding absolute mean errors (AME; 1.69222 and 1.468722)
+represents, approximately, 50% and 43% of the average value of the
+ET0_PM (3.367377).</p>
+</div>
+<div id="step-3-the-crop-water-balance-accounting.-applying-initiald-and-cwb-in-campinas-sp-brazil" class="section level2">
+<h2>Step 3: The Crop Water Balance Accounting. Applying
+<code>InitialD()</code> and <code>CWB()</code> in Campinas-SP,
+Brazil</h2>
+<p>Considering the previous results, we applied the <code>CWB()</code>
+using daily values of rainfall and ET0_PM obtained/estimated from daily
+data of the weather station of Campinas. We included this meteorological
+data in the package (DataForCWB), along with parameters required for
+calculating the crop water balance: depth of the root zone (Drz),
+available water capacity (AWC; amount of water between field capacity
+and permanent wilting point), management allowed depletion (MAD), and
+crop coefficient (Kc). The example below loaded DataForCWB to apply
+<code>CWB()</code> in Campinas-SP. Only for the sake of simplicity, Kc
+values were set to 1 for the entire period. The initial D value
+(Dinitial) required for initiating the crop water balance account was
+obtained using function <code>DInitial()</code> with teta_FC and AWC
+values obtained from two data sets included in the package
+(DataForSWC.rda and DataForAWC). These data sets provide soil water
+content values (m3/m3) for the effective root zone at the field capacity
+and at permanent wilting point, and AWC values (mm/m), respectively
+(teta_obs was measured in the field). We applied the <code>CWB()</code>
+function considering two scenarios. Scenario 1 in which no irrigation
+was applied and scenario 2 in which the package’s recommendation about
+when and how much to irrigate was met.</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>Tavg <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">2</span>]</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>Tmax <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">3</span>]</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>Tmin <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">4</span>]</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>Rn <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">6</span>]</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>WS <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">7</span>]</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>RH <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">8</span>]</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>G <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">9</span>]</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>ET0 <span class="ot">&lt;-</span> <span class="fu">ET0_PM</span>(Tavg, Tmax, Tmin, Rn, RH, WS, G, <span class="at">Alt =</span> <span class="dv">700</span>)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>Dinitial <span class="ot">&lt;-</span></span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a>  <span class="fu">Dinitial</span>(<span class="at">teta_FC =</span> <span class="fl">0.30</span>,</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a>           <span class="at">teta_Obs =</span> <span class="fl">0.17</span>,</span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a>           <span class="at">Drz =</span> DataForCWB[<span class="dv">1</span>, <span class="dv">11</span>])</span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a>Rain <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">10</span>]</span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a>Drz <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">11</span>]</span>
+<span id="cb6-15"><a href="#cb6-15" tabindex="-1"></a>AWC <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">12</span>]</span>
+<span id="cb6-16"><a href="#cb6-16" tabindex="-1"></a>MAD <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">13</span>]</span>
+<span id="cb6-17"><a href="#cb6-17" tabindex="-1"></a>Kc <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">14</span>]</span>
+<span id="cb6-18"><a href="#cb6-18" tabindex="-1"></a>Irrig <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">15</span>]</span>
+<span id="cb6-19"><a href="#cb6-19" tabindex="-1"></a>Scenario1 <span class="ot">&lt;-</span> <span class="fu">CWB</span>(</span>
+<span id="cb6-20"><a href="#cb6-20" tabindex="-1"></a>  <span class="at">Rain =</span> Rain,</span>
+<span id="cb6-21"><a href="#cb6-21" tabindex="-1"></a>  <span class="at">ET0 =</span> ET0,</span>
+<span id="cb6-22"><a href="#cb6-22" tabindex="-1"></a>  <span class="at">AWC =</span> AWC,</span>
+<span id="cb6-23"><a href="#cb6-23" tabindex="-1"></a>  <span class="at">Drz =</span> Drz,</span>
+<span id="cb6-24"><a href="#cb6-24" tabindex="-1"></a>  <span class="at">Kc =</span> Kc,</span>
+<span id="cb6-25"><a href="#cb6-25" tabindex="-1"></a>  <span class="at">Irrig =</span> Irrig,</span>
+<span id="cb6-26"><a href="#cb6-26" tabindex="-1"></a>  <span class="at">MAD =</span> MAD,</span>
+<span id="cb6-27"><a href="#cb6-27" tabindex="-1"></a>  <span class="at">InitialD =</span> Dinitial,</span>
+<span id="cb6-28"><a href="#cb6-28" tabindex="-1"></a>  <span class="at">start.date =</span> <span class="st">&quot;2011-11-23&quot;</span></span>
+<span id="cb6-29"><a href="#cb6-29" tabindex="-1"></a>)</span>
+<span id="cb6-30"><a href="#cb6-30" tabindex="-1"></a>Scenario1[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, ]</span>
+<span id="cb6-31"><a href="#cb6-31" tabindex="-1"></a><span class="co">#&gt;            DaysSeason Rain Irrig ET0 Kc WaterStressCoef_Ks ETc (P+Irrig)-ETc</span></span>
+<span id="cb6-32"><a href="#cb6-32" tabindex="-1"></a><span class="co">#&gt; 2011-11-23          1 45.5     0 2.4  1                1.0 2.4          43.0</span></span>
+<span id="cb6-33"><a href="#cb6-33" tabindex="-1"></a><span class="co">#&gt; 2011-11-24          2  0.3     0 4.2  1                1.0 4.2          -3.9</span></span>
+<span id="cb6-34"><a href="#cb6-34" tabindex="-1"></a><span class="co">#&gt; 2011-11-25          3  0.0     0 4.3  1                1.0 4.3          -4.3</span></span>
+<span id="cb6-35"><a href="#cb6-35" tabindex="-1"></a><span class="co">#&gt; 2011-11-26          4 11.4     0 3.7  1                1.0 3.7           7.8</span></span>
+<span id="cb6-36"><a href="#cb6-36" tabindex="-1"></a><span class="co">#&gt; 2011-11-27          5  0.3     0 4.8  1                1.0 4.8          -4.6</span></span>
+<span id="cb6-37"><a href="#cb6-37" tabindex="-1"></a><span class="co">#&gt; 2011-11-28          6  0.0     0 5.7  1                1.0 5.7          -5.7</span></span>
+<span id="cb6-38"><a href="#cb6-38" tabindex="-1"></a><span class="co">#&gt; 2011-11-29          7  0.0     0 5.8  1                0.9 5.8          -5.8</span></span>
+<span id="cb6-39"><a href="#cb6-39" tabindex="-1"></a><span class="co">#&gt; 2011-11-30          8  0.5     0 3.0  1                0.8 3.0          -2.5</span></span>
+<span id="cb6-40"><a href="#cb6-40" tabindex="-1"></a><span class="co">#&gt;            NonStandardCropEvap ET_Defict  TAW SoilWaterDeficit d_MAD</span></span>
+<span id="cb6-41"><a href="#cb6-41" tabindex="-1"></a><span class="co">#&gt; 2011-11-23                 2.4       0.0 45.7              0.0  13.7</span></span>
+<span id="cb6-42"><a href="#cb6-42" tabindex="-1"></a><span class="co">#&gt; 2011-11-24                 4.2       0.0 45.7              3.9  13.7</span></span>
+<span id="cb6-43"><a href="#cb6-43" tabindex="-1"></a><span class="co">#&gt; 2011-11-25                 4.3       0.0 45.7              8.2  13.7</span></span>
+<span id="cb6-44"><a href="#cb6-44" tabindex="-1"></a><span class="co">#&gt; 2011-11-26                 3.7       0.0 45.7              0.4  13.7</span></span>
+<span id="cb6-45"><a href="#cb6-45" tabindex="-1"></a><span class="co">#&gt; 2011-11-27                 4.8       0.0 45.7              5.0  13.7</span></span>
+<span id="cb6-46"><a href="#cb6-46" tabindex="-1"></a><span class="co">#&gt; 2011-11-28                 5.7       0.0 45.7             10.7  13.7</span></span>
+<span id="cb6-47"><a href="#cb6-47" tabindex="-1"></a><span class="co">#&gt; 2011-11-29                 5.3       0.5 45.7             16.5  13.7</span></span>
+<span id="cb6-48"><a href="#cb6-48" tabindex="-1"></a><span class="co">#&gt; 2011-11-30                 2.5       0.5 45.7             19.0  13.7</span></span>
+<span id="cb6-49"><a href="#cb6-49" tabindex="-1"></a><span class="co">#&gt;                        D&gt;=dmad</span></span>
+<span id="cb6-50"><a href="#cb6-50" tabindex="-1"></a><span class="co">#&gt; 2011-11-23                  No</span></span>
+<span id="cb6-51"><a href="#cb6-51" tabindex="-1"></a><span class="co">#&gt; 2011-11-24                  No</span></span>
+<span id="cb6-52"><a href="#cb6-52" tabindex="-1"></a><span class="co">#&gt; 2011-11-25                  No</span></span>
+<span id="cb6-53"><a href="#cb6-53" tabindex="-1"></a><span class="co">#&gt; 2011-11-26                  No</span></span>
+<span id="cb6-54"><a href="#cb6-54" tabindex="-1"></a><span class="co">#&gt; 2011-11-27                  No</span></span>
+<span id="cb6-55"><a href="#cb6-55" tabindex="-1"></a><span class="co">#&gt; 2011-11-28                  No</span></span>
+<span id="cb6-56"><a href="#cb6-56" tabindex="-1"></a><span class="co">#&gt; 2011-11-29 Yes. Irrigate 16 mm</span></span>
+<span id="cb6-57"><a href="#cb6-57" tabindex="-1"></a><span class="co">#&gt; 2011-11-30 Yes. Irrigate 19 mm</span></span>
+<span id="cb6-58"><a href="#cb6-58" tabindex="-1"></a>Irrig[<span class="dv">7</span>] <span class="ot">&lt;-</span> <span class="dv">16</span></span>
+<span id="cb6-59"><a href="#cb6-59" tabindex="-1"></a>Scenario2 <span class="ot">&lt;-</span> <span class="fu">CWB</span>(</span>
+<span id="cb6-60"><a href="#cb6-60" tabindex="-1"></a>  <span class="at">Rain =</span> Rain,</span>
+<span id="cb6-61"><a href="#cb6-61" tabindex="-1"></a>  <span class="at">ET0 =</span> ET0,</span>
+<span id="cb6-62"><a href="#cb6-62" tabindex="-1"></a>  <span class="at">AWC =</span> AWC,</span>
+<span id="cb6-63"><a href="#cb6-63" tabindex="-1"></a>  <span class="at">Drz =</span> Drz,</span>
+<span id="cb6-64"><a href="#cb6-64" tabindex="-1"></a>  <span class="at">Kc =</span> Kc,</span>
+<span id="cb6-65"><a href="#cb6-65" tabindex="-1"></a>  <span class="at">Irrig =</span> Irrig,</span>
+<span id="cb6-66"><a href="#cb6-66" tabindex="-1"></a>  <span class="at">MAD =</span> MAD,</span>
+<span id="cb6-67"><a href="#cb6-67" tabindex="-1"></a>  <span class="at">InitialD =</span> Dinitial,</span>
+<span id="cb6-68"><a href="#cb6-68" tabindex="-1"></a>  <span class="at">start.date =</span> <span class="st">&quot;2011-11-23&quot;</span></span>
+<span id="cb6-69"><a href="#cb6-69" tabindex="-1"></a>)</span>
+<span id="cb6-70"><a href="#cb6-70" tabindex="-1"></a>Scenario2[<span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>, ]</span>
+<span id="cb6-71"><a href="#cb6-71" tabindex="-1"></a><span class="co">#&gt;            DaysSeason Rain Irrig ET0 Kc WaterStressCoef_Ks ETc (P+Irrig)-ETc</span></span>
+<span id="cb6-72"><a href="#cb6-72" tabindex="-1"></a><span class="co">#&gt; 2011-11-23          1 45.5     0 2.4  1                  1 2.4          43.0</span></span>
+<span id="cb6-73"><a href="#cb6-73" tabindex="-1"></a><span class="co">#&gt; 2011-11-24          2  0.3     0 4.2  1                  1 4.2          -3.9</span></span>
+<span id="cb6-74"><a href="#cb6-74" tabindex="-1"></a><span class="co">#&gt; 2011-11-25          3  0.0     0 4.3  1                  1 4.3          -4.3</span></span>
+<span id="cb6-75"><a href="#cb6-75" tabindex="-1"></a><span class="co">#&gt; 2011-11-26          4 11.4     0 3.7  1                  1 3.7           7.8</span></span>
+<span id="cb6-76"><a href="#cb6-76" tabindex="-1"></a><span class="co">#&gt; 2011-11-27          5  0.3     0 4.8  1                  1 4.8          -4.6</span></span>
+<span id="cb6-77"><a href="#cb6-77" tabindex="-1"></a><span class="co">#&gt; 2011-11-28          6  0.0     0 5.7  1                  1 5.7          -5.7</span></span>
+<span id="cb6-78"><a href="#cb6-78" tabindex="-1"></a><span class="co">#&gt; 2011-11-29          7  0.0    16 5.8  1                  1 5.8          10.2</span></span>
+<span id="cb6-79"><a href="#cb6-79" tabindex="-1"></a><span class="co">#&gt; 2011-11-30          8  0.5     0 3.0  1                  1 3.0          -2.5</span></span>
+<span id="cb6-80"><a href="#cb6-80" tabindex="-1"></a><span class="co">#&gt;            NonStandardCropEvap ET_Defict  TAW SoilWaterDeficit d_MAD D&gt;=dmad</span></span>
+<span id="cb6-81"><a href="#cb6-81" tabindex="-1"></a><span class="co">#&gt; 2011-11-23                 2.4         0 45.7              0.0  13.7      No</span></span>
+<span id="cb6-82"><a href="#cb6-82" tabindex="-1"></a><span class="co">#&gt; 2011-11-24                 4.2         0 45.7              3.9  13.7      No</span></span>
+<span id="cb6-83"><a href="#cb6-83" tabindex="-1"></a><span class="co">#&gt; 2011-11-25                 4.3         0 45.7              8.2  13.7      No</span></span>
+<span id="cb6-84"><a href="#cb6-84" tabindex="-1"></a><span class="co">#&gt; 2011-11-26                 3.7         0 45.7              0.4  13.7      No</span></span>
+<span id="cb6-85"><a href="#cb6-85" tabindex="-1"></a><span class="co">#&gt; 2011-11-27                 4.8         0 45.7              5.0  13.7      No</span></span>
+<span id="cb6-86"><a href="#cb6-86" tabindex="-1"></a><span class="co">#&gt; 2011-11-28                 5.7         0 45.7             10.7  13.7      No</span></span>
+<span id="cb6-87"><a href="#cb6-87" tabindex="-1"></a><span class="co">#&gt; 2011-11-29                 5.8         0 45.7              0.5  13.7      No</span></span>
+<span id="cb6-88"><a href="#cb6-88" tabindex="-1"></a><span class="co">#&gt; 2011-11-30                 3.0         0 45.7              3.0  13.7      No</span></span></code></pre></div>
+<p>In both scenarios, the package suggested irrigating on 29/11/2011
+because the soil water deficit had become larger than dmad. Since in
+scenario 1 we applied no irrigation, the Ks coefficient started to
+assume values smaller than 1 and the NonStandardCropEvap becomes smaller
+than ETc, which may prevent the crop from achieving its potential yield.
+In scenario 2, we followed the package’s recommendation and applied
+irrigation on day 29 (Irrig = 16 mm). In this case, no crop
+evapotranspiration deficit was observed, indicating no water shortage in
+the root zone.</p>
+</div>
+<div id="step-3-alternative-the-crop-water-balance-accounting.-applying-initiald-and-cwb_fixedschedule-in-campinas-sp-brazil" class="section level2">
+<h2>Step 3 (Alternative): The Crop Water Balance Accounting. Applying
+<code>InitialD()</code> and <code>CWB_fixedSchedule</code> in
+Campinas-SP, Brazil</h2>
+<p>Until now, we have assumed that the decision of when and how much to
+irrigate was solely dependent on soil-plant-atmosphere factors. However,
+it is well-known that this decision may also be significantly influenced
+by the design and operation of the irrigation system, as well as the
+availability of labor and water. This is why we included in the package
+the <code>CWB_fixedSchedule</code> fuction that, as the
+<code>CWB()</code>, also calculates the crop water balance in the root
+zone. However, it allows users to specify the number of days between
+consecutive irrigations.This is accompliched by setting the parameter
+Scheduling to the number of days defining this fixed interval between
+two consecutive irrigations. The estimation of how much to irrigate is
+performed on this specific days. This is why we included in the package
+the <code>CWB_fixedSchedule()</code> function that, as the
+<code>CWB</code>, also calculates the crop water balance in the root
+zone. However, it allows users to specify the number of days between
+consecutive irrigations.This is accomplished by setting the parameter
+Scheduling to the number of days defining this fixed interval between
+two consecutive irrigations. The estimation of how much to irrigate is
+performed on this specific days.</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>Tavg <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">2</span>]</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a>Tmax <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">3</span>]</span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>Tmin <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">4</span>]</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>Rn <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">6</span>]</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>WS <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">7</span>]</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>RH <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">8</span>]</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a>G <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">9</span>]</span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>ET0 <span class="ot">&lt;-</span> <span class="fu">ET0_PM</span>(Tavg, Tmax, Tmin, Rn, RH, WS, G, <span class="at">Alt =</span> <span class="dv">700</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>Dinitial <span class="ot">&lt;-</span></span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>  <span class="fu">Dinitial</span>(<span class="at">teta_FC =</span> <span class="fl">0.30</span>,</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>           <span class="at">teta_Obs =</span> <span class="fl">0.17</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>           <span class="at">Drz =</span> DataForCWB[<span class="dv">1</span>, <span class="dv">11</span>])</span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>Rain <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">10</span>]</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>Drz <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">11</span>]</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>AWC <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">12</span>]</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>MAD <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">13</span>]</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a>Kc <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">14</span>]</span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a>Scheduling <span class="ot">&lt;-</span> <span class="dv">5</span></span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a>Irrig <span class="ot">&lt;-</span> DataForCWB[, <span class="dv">15</span>]</span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a>Scenario_FixedSchedule <span class="ot">&lt;-</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a>  <span class="fu">CWB_FixedSchedule</span>(</span>
+<span id="cb7-22"><a href="#cb7-22" tabindex="-1"></a>    <span class="at">Rain =</span> Rain,</span>
+<span id="cb7-23"><a href="#cb7-23" tabindex="-1"></a>    <span class="at">ET0 =</span> ET0,</span>
+<span id="cb7-24"><a href="#cb7-24" tabindex="-1"></a>    <span class="at">AWC =</span> AWC,</span>
+<span id="cb7-25"><a href="#cb7-25" tabindex="-1"></a>    <span class="at">Drz =</span> Drz,</span>
+<span id="cb7-26"><a href="#cb7-26" tabindex="-1"></a>    <span class="at">Kc =</span> Kc,</span>
+<span id="cb7-27"><a href="#cb7-27" tabindex="-1"></a>    <span class="at">Irrig =</span> Irrig,</span>
+<span id="cb7-28"><a href="#cb7-28" tabindex="-1"></a>    <span class="at">MAD =</span> MAD,</span>
+<span id="cb7-29"><a href="#cb7-29" tabindex="-1"></a>    <span class="at">InitialD =</span> Dinitial,</span>
+<span id="cb7-30"><a href="#cb7-30" tabindex="-1"></a>    <span class="at">Scheduling =</span> Scheduling,</span>
+<span id="cb7-31"><a href="#cb7-31" tabindex="-1"></a>    <span class="at">start.date =</span> <span class="st">&quot;2011-11-23&quot;</span></span>
+<span id="cb7-32"><a href="#cb7-32" tabindex="-1"></a>  )</span>
+<span id="cb7-33"><a href="#cb7-33" tabindex="-1"></a>Scenario_FixedSchedule[<span class="dv">1</span><span class="sc">:</span><span class="dv">15</span>, ]</span>
+<span id="cb7-34"><a href="#cb7-34" tabindex="-1"></a><span class="co">#&gt;            DaysSeason   Rain Irrig   ET0 Kc WaterStressCoef_Ks   ETc</span></span>
+<span id="cb7-35"><a href="#cb7-35" tabindex="-1"></a><span class="co">#&gt; 2011-11-23          1 45.470     0 2.440  1              1.000 2.440</span></span>
+<span id="cb7-36"><a href="#cb7-36" tabindex="-1"></a><span class="co">#&gt; 2011-11-24          2  0.254     0 4.172  1              1.000 4.172</span></span>
+<span id="cb7-37"><a href="#cb7-37" tabindex="-1"></a><span class="co">#&gt; 2011-11-25          3  0.000     0 4.290  1              1.000 4.290</span></span>
+<span id="cb7-38"><a href="#cb7-38" tabindex="-1"></a><span class="co">#&gt; 2011-11-26          4 11.430     0 3.665  1              1.000 3.665</span></span>
+<span id="cb7-39"><a href="#cb7-39" tabindex="-1"></a><span class="co">#&gt; 2011-11-27          5  0.254     0 4.849  1              1.000 4.849</span></span>
+<span id="cb7-40"><a href="#cb7-40" tabindex="-1"></a><span class="co">#&gt; 2011-11-28          6  0.000     0 5.670  1              1.000 5.670</span></span>
+<span id="cb7-41"><a href="#cb7-41" tabindex="-1"></a><span class="co">#&gt; 2011-11-29          7  0.000     0 5.757  1              0.914 5.757</span></span>
+<span id="cb7-42"><a href="#cb7-42" tabindex="-1"></a><span class="co">#&gt; 2011-11-30          8  0.508     0 3.009  1              0.836 3.009</span></span>
+<span id="cb7-43"><a href="#cb7-43" tabindex="-1"></a><span class="co">#&gt; 2011-12-01          9 35.810     0 3.588  1              1.000 3.588</span></span>
+<span id="cb7-44"><a href="#cb7-44" tabindex="-1"></a><span class="co">#&gt; 2011-12-02         10  0.000     0 3.929  1              1.000 3.929</span></span>
+<span id="cb7-45"><a href="#cb7-45" tabindex="-1"></a><span class="co">#&gt; 2011-12-03         11 11.940     0 3.179  1              1.000 3.179</span></span>
+<span id="cb7-46"><a href="#cb7-46" tabindex="-1"></a><span class="co">#&gt; 2011-12-04         12 21.340     0 3.180  1              1.000 3.180</span></span>
+<span id="cb7-47"><a href="#cb7-47" tabindex="-1"></a><span class="co">#&gt; 2011-12-05         13  0.000     0 4.239  1              1.000 4.239</span></span>
+<span id="cb7-48"><a href="#cb7-48" tabindex="-1"></a><span class="co">#&gt; 2011-12-06         14 10.920     0 3.925  1              1.000 3.925</span></span>
+<span id="cb7-49"><a href="#cb7-49" tabindex="-1"></a><span class="co">#&gt; 2011-12-07         15  3.302     0 3.737  1              1.000 3.737</span></span>
+<span id="cb7-50"><a href="#cb7-50" tabindex="-1"></a><span class="co">#&gt;            (P+Irrig)-ETc NonStandardCropEvap ET_Defict   TAW SoilWaterDeficit</span></span>
+<span id="cb7-51"><a href="#cb7-51" tabindex="-1"></a><span class="co">#&gt; 2011-11-23        43.030               2.440     0.000 45.72            0.000</span></span>
+<span id="cb7-52"><a href="#cb7-52" tabindex="-1"></a><span class="co">#&gt; 2011-11-24        -3.918               4.172     0.000 45.72            3.918</span></span>
+<span id="cb7-53"><a href="#cb7-53" tabindex="-1"></a><span class="co">#&gt; 2011-11-25        -4.290               4.290     0.000 45.72            8.208</span></span>
+<span id="cb7-54"><a href="#cb7-54" tabindex="-1"></a><span class="co">#&gt; 2011-11-26         7.765               3.665     0.000 45.72            0.444</span></span>
+<span id="cb7-55"><a href="#cb7-55" tabindex="-1"></a><span class="co">#&gt; 2011-11-27        -4.595               4.849     0.000 45.72            5.038</span></span>
+<span id="cb7-56"><a href="#cb7-56" tabindex="-1"></a><span class="co">#&gt; 2011-11-28        -5.670               5.670     0.000 45.72           10.708</span></span>
+<span id="cb7-57"><a href="#cb7-57" tabindex="-1"></a><span class="co">#&gt; 2011-11-29        -5.757               5.263     0.495 45.72           16.465</span></span>
+<span id="cb7-58"><a href="#cb7-58" tabindex="-1"></a><span class="co">#&gt; 2011-11-30        -2.501               2.516     0.494 45.72           18.967</span></span>
+<span id="cb7-59"><a href="#cb7-59" tabindex="-1"></a><span class="co">#&gt; 2011-12-01        32.222               3.588     0.000 76.20            0.000</span></span>
+<span id="cb7-60"><a href="#cb7-60" tabindex="-1"></a><span class="co">#&gt; 2011-12-02        -3.929               3.929     0.000 76.20            3.929</span></span>
+<span id="cb7-61"><a href="#cb7-61" tabindex="-1"></a><span class="co">#&gt; 2011-12-03         8.761               3.179     0.000 76.20            0.000</span></span>
+<span id="cb7-62"><a href="#cb7-62" tabindex="-1"></a><span class="co">#&gt; 2011-12-04        18.160               3.180     0.000 76.20            0.000</span></span>
+<span id="cb7-63"><a href="#cb7-63" tabindex="-1"></a><span class="co">#&gt; 2011-12-05        -4.239               4.239     0.000 76.20            4.239</span></span>
+<span id="cb7-64"><a href="#cb7-64" tabindex="-1"></a><span class="co">#&gt; 2011-12-06         6.995               3.925     0.000 76.20            0.000</span></span>
+<span id="cb7-65"><a href="#cb7-65" tabindex="-1"></a><span class="co">#&gt; 2011-12-07        -0.435               3.737     0.000 76.20            0.435</span></span>
+<span id="cb7-66"><a href="#cb7-66" tabindex="-1"></a><span class="co">#&gt;             d_MAD            Scheduling</span></span>
+<span id="cb7-67"><a href="#cb7-67" tabindex="-1"></a><span class="co">#&gt; 2011-11-23 13.716                    No</span></span>
+<span id="cb7-68"><a href="#cb7-68" tabindex="-1"></a><span class="co">#&gt; 2011-11-24 13.716                    No</span></span>
+<span id="cb7-69"><a href="#cb7-69" tabindex="-1"></a><span class="co">#&gt; 2011-11-25 13.716                    No</span></span>
+<span id="cb7-70"><a href="#cb7-70" tabindex="-1"></a><span class="co">#&gt; 2011-11-26 13.716                    No</span></span>
+<span id="cb7-71"><a href="#cb7-71" tabindex="-1"></a><span class="co">#&gt; 2011-11-27 13.716 Time to Irrigate 5 mm</span></span>
+<span id="cb7-72"><a href="#cb7-72" tabindex="-1"></a><span class="co">#&gt; 2011-11-28 13.716                    No</span></span>
+<span id="cb7-73"><a href="#cb7-73" tabindex="-1"></a><span class="co">#&gt; 2011-11-29 13.716                    No</span></span>
+<span id="cb7-74"><a href="#cb7-74" tabindex="-1"></a><span class="co">#&gt; 2011-11-30 13.716                    No</span></span>
+<span id="cb7-75"><a href="#cb7-75" tabindex="-1"></a><span class="co">#&gt; 2011-12-01 22.860                    No</span></span>
+<span id="cb7-76"><a href="#cb7-76" tabindex="-1"></a><span class="co">#&gt; 2011-12-02 22.860 Time to Irrigate 4 mm</span></span>
+<span id="cb7-77"><a href="#cb7-77" tabindex="-1"></a><span class="co">#&gt; 2011-12-03 22.860                    No</span></span>
+<span id="cb7-78"><a href="#cb7-78" tabindex="-1"></a><span class="co">#&gt; 2011-12-04 22.860                    No</span></span>
+<span id="cb7-79"><a href="#cb7-79" tabindex="-1"></a><span class="co">#&gt; 2011-12-05 22.860                    No</span></span>
+<span id="cb7-80"><a href="#cb7-80" tabindex="-1"></a><span class="co">#&gt; 2011-12-06 22.860                    No</span></span>
+<span id="cb7-81"><a href="#cb7-81" tabindex="-1"></a><span class="co">#&gt; 2011-12-07 22.860 Time to Irrigate 0 mm</span></span></code></pre></div>
+</div>
+</div>
+<div id="references" class="section level1">
+<h1>References</h1>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
